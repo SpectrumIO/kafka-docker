@@ -15,7 +15,9 @@ jobs:
             # tags don't line up with kafka version 
             export VERSION=`cat Dockerfile| grep "ARG kafka_version=" | sed 's/ARG kafka_version=//'`
             docker build -t getspectrum/kafka:$VERSION .
+            docker tag getspectrum/kafka:$VERSION getspectrum/kafka:latest
             docker push getspectrum/kafka:$VERSION
+            docker push getspectrum/kafka:latest
 
 workflows:
   version: 2
