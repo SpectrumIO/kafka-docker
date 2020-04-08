@@ -1,0 +1,31 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/build
+    docker:
+      - image: circleci/python
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run:
+          name: build image
+          command: |
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            # tags don't line up with kafka version 
+            export VERSION=`cat Dockerfile| grep "ARG kafka_version=" | sed 's/ARG kafka_version=//'`
+            docker build -t getspectrum/kafka:$VERSION .
+            docker tag getspectrum/kafka:$VERSION getspectrum/kafka:latest
+            docker push getspectrum/kafka:$VERSION
+            docker push getspectrum/kafka:latest
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+    - build:
+        context: bintray_docker
+        filters:
+          branches:
+            only:
+              - master
